@@ -36,8 +36,8 @@ During a video, press **Power** to turn the screen off while the audio keeps pla
 
 ## Updates
 
-If you have v0.1.0, install the latest ZIP for your model once to get the updater. Starting with v0.2.0, TubeHero checks for stable releases whenever you open it. You can also select **Settings → Check for updates** to check again or see the result.
+If you have v0.1.0, install the latest ZIP for your model once to get the updater.
 
-When an update is ready, close and reopen TubeHero to apply it. Your library and playback preferences carry over. If the update cannot open its first screen, TubeHero returns to the previous working version.
+TubeHero checks for a new version each time you open it and asks before installing: choose **Update now** or **Later**. You can also select **Settings → Software update**. The update downloads in the background, then TubeHero restarts into it (if a video is playing, it waits until you leave the video) and tells you the new version. Your library and settings carry over. If an update cannot open its first screen, TubeHero returns to the previous working version.
 
 [Release notes and checksums](https://github.com/CreatonDevelopment/TubeHero/releases/latest)
