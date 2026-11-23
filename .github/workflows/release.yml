@@ -1,0 +1,68 @@
+name: Publish release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Semantic version increment
+        type: choice
+        required: true
+        default: patch
+        options:
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tubehero-release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      BUMP: ${{ inputs.bump }}
+    steps:
+      - name: Publish the staged device build
+        shell: bash
+        run: |
+          set -euo pipefail
+          api="repos/$GITHUB_REPOSITORY"
+          asset="TubeHero-Brick-Hammer-Stock-1.1.1.zip"
+          gh api --paginate "$api/releases?per_page=100" --jq '.[] | select(.draft and .tag_name == "candidate") | .id' > drafts
+          if [[ $(wc -l < drafts) -ne 1 ]]; then
+            echo "::error::Stage the tested device ZIP in the candidate draft first."
+            exit 1
+          fi
+          id=$(cat drafts)
+          gh api "$api/releases/$id" > candidate.json
+          jq -e --arg asset "$asset" '.draft and .tag_name == "candidate" and
+            (.assets | length == 1) and .assets[0].name == $asset and
+            .assets[0].state == "uploaded" and .assets[0].size > 0 and
+            (.assets[0].digest | test("^sha256:[a-f0-9]{64}$"))' candidate.json > /dev/null
+
+          gh api --paginate "$api/tags?per_page=100" --jq '.[].name' > tags
+          version=$(python3 - <<'PY'
+          import os, re
+          from pathlib import Path
+          stable = re.compile(r"v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)")
+          tags = (stable.fullmatch(t) for t in Path("tags").read_text().splitlines())
+          parts = list(max((tuple(map(int, tag.groups())) for tag in tags if tag), default=(0, 0, 0)))
+          index = ["major", "minor", "patch"].index(os.environ["BUMP"])
+          parts[index] += 1
+          parts[index + 1:] = [0] * (2 - index)
+          print("v" + ".".join(map(str, parts)))
+          PY
+          )
+          jq --arg tag "$version" --arg sha "$GITHUB_SHA" '{
+            tag_name: $tag, target_commitish: $sha, name: ("TubeHero " + $tag),
+            body: ((.body // "") + "\n\nPackage SHA-256\n\n`" + (.assets[0].digest | sub("^sha256:"; "")) + "`"),
+            draft: false, prerelease: false, make_latest: "true"
+          }' candidate.json > publish.json
+          gh api --method PATCH "$api/releases/$id" --input publish.json --jq '.html_url'
