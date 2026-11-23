@@ -1,5 +1,4 @@
 name: Publish release
-
 on:
   workflow_dispatch:
     inputs:
@@ -8,65 +7,114 @@ on:
         type: choice
         required: true
         default: patch
-        options:
-          - patch
-          - minor
-          - major
-
-permissions:
-  contents: write
+        options: [patch, minor, major]
 
 concurrency:
   group: tubehero-release
   cancel-in-progress: false
 
+permissions: {}
 jobs:
-  publish:
+  release:
     if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    env:
-      GH_TOKEN: ${{ github.token }}
-      BUMP: ${{ inputs.bump }}
-    steps:
-      - name: Publish the staged device packages
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 55
+    environment: release-source
+    permissions:
+      contents: write
+    defaults:
+      run:
         shell: bash
+    steps:
+      - name: Select the next stable version
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUMP: ${{ inputs.bump }}
+        run: |
+          set -euo pipefail
+          gh api --paginate "repos/$GITHUB_REPOSITORY/tags?per_page=100" --jq '.[].name' > "$RUNNER_TEMP/tags"
+          python3 - <<'PY' >> "$GITHUB_ENV"
+          import os,re
+          from pathlib import Path
+          tags = Path(os.environ["RUNNER_TEMP"], "tags").read_text().splitlines()
+          pattern = re.compile(r"v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)")
+          parts = list(max((tuple(map(int,m.groups())) for t in tags if (m:=pattern.fullmatch(t))), default=(0,0,0)))
+          i = ["major","minor","patch"].index(os.environ["BUMP"])
+          parts[i] += 1
+          parts[i+1:] = [0]*(2-i)
+          print("VERSION=" + ".".join(map(str,parts)))
+          PY
+      - name: Fetch release source with read-only access
+        env:
+          DEPLOY_KEY: ${{ secrets.SOURCE_DEPLOY_KEY }}
+          SOURCE: ${{ secrets.SOURCE_REPOSITORY }}
+        run: |
+          set -euo pipefail
+          umask 077
+          identity="$RUNNER_TEMP/release-identity"
+          trap 'rm -f "$identity"' EXIT
+          printf '%s\n' "$DEPLOY_KEY" > "$identity"
+          unset DEPLOY_KEY
+          curl -fsSL --retry 3 https://api.github.com/meta | jq -r '.ssh_keys[] | "github.com " + .' > "$RUNNER_TEMP/known_hosts"
+          export GIT_SSH_COMMAND="ssh -i $identity -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$RUNNER_TEMP/known_hosts"
+          git clone --quiet --depth 1 --single-branch --branch main "git@github.com:$SOURCE.git" source
+          commit=$(git -C source rev-parse HEAD)
+          git -C source remote remove origin
+          echo "Building v$VERSION from private commit \`$commit\`" >> "$GITHUB_STEP_SUMMARY"
+      - name: Compile app and player, test, and package device builds
+        run: |
+          set -euo pipefail
+          docker run --rm -v "$PWD/source:/src" -w /src \
+            rust:1.94.1-bullseye@sha256:f4f82b80e5f2945fed4ba17af177c6d6be85d98cde38ff318fc7666ce4505617 \
+            bash scripts/build-release.sh "$VERSION"
+      - name: Test packaged ARM apps and recovery on the runner
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends ffmpeg xvfb xauth libsdl2-2.0-0 libgl1-mesa-dri libegl1
+          if ! xvfb-run -a python3 source/tests/update_install.py source/dist >"$RUNNER_TEMP/device-test.log" 2>&1; then
+            grep -E 'passed|rolled back|RuntimeError:|AssertionError:' "$RUNNER_TEMP/device-test.log" | cut -c1-250 | tail -8 || true
+            exit 1
+          fi
+          grep -E 'passed|rolled back' "$RUNNER_TEMP/device-test.log"
+      - name: Publish verified downloads
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           api="repos/$GITHUB_REPOSITORY"
-          gh api --paginate "$api/releases?per_page=100" --jq '.[] | select(.draft and .tag_name == "candidate") | .id' > drafts
-          if [[ $(wc -l < drafts) -ne 1 ]]; then
-            echo "::error::Stage the tested device ZIP in the candidate draft first."
-            exit 1
+          gh api "$api/contents/README.md?ref=$GITHUB_SHA" --jq .content | base64 -d > "$RUNNER_TEMP/README"
+          grep -oE 'releases/latest/download/[A-Za-z0-9._-]+\.zip' "$RUNNER_TEMP/README" | cut -d/ -f4 | sort -u > "$RUNNER_TEMP/listed"
+          find source/dist -maxdepth 1 -type f -printf '%f\n' | sort > "$RUNNER_TEMP/built"
+          test -s "$RUNNER_TEMP/listed"
+          diff -u "$RUNNER_TEMP/listed" "$RUNNER_TEMP/built"
+          notes="$RUNNER_TEMP/notes.md"
+          if [[ -f "source/docs/releases/v$VERSION.md" ]]; then
+            cp "source/docs/releases/v$VERSION.md" "$notes"
+          else
+            printf 'Choose your model from the [device download guide](https://github.com/%s#device-downloads).\n' "$GITHUB_REPOSITORY" > "$notes"
           fi
-          id=$(cat drafts)
-          gh api "$api/releases/$id" > candidate.json
-          gh api "$api/contents/README.md?ref=$GITHUB_SHA" --jq .content | base64 -d > README.md
-          grep -oE 'releases/latest/download/[A-Za-z0-9._-]+\.zip' README.md | cut -d/ -f4 | sort -u > listed
-          test -s listed
-          jq -r '.assets[].name' candidate.json | sort > staged
-          diff -u listed staged
-          jq -e '.draft and .tag_name == "candidate" and all(.assets[];
-            .state == "uploaded" and .size > 0 and
-            (.digest | test("^sha256:[a-f0-9]{64}$")))' candidate.json > /dev/null
-
-          gh api --paginate "$api/tags?per_page=100" --jq '.[].name' > tags
-          version=$(python3 - <<'PY'
-          import os, re
+          printf '\n### SHA-256\n\n' >> "$notes"
+          (cd source/dist && sha256sum *.zip) | awk '{printf "- `%s` - `%s`\n",$2,$1}' >> "$notes"
+          marker="<!-- release-run:$GITHUB_RUN_ID -->"
+          printf '\n%s\n' "$marker" >> "$notes"
+          gh api --paginate "$api/releases?per_page=100" --jq '.[] | select(.draft == false) | .body' > "$RUNNER_TEMP/published"
+          if grep -Fq "$marker" "$RUNNER_TEMP/published"; then echo 'This run has already published a release.'; exit 0; fi
+          draft="build-$GITHUB_RUN_ID"
+          if ! gh release view "$draft" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release create "$draft" -R "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --draft --title "TubeHero v$VERSION" --notes-file "$notes"
+          fi
+          gh release upload "$draft" -R "$GITHUB_REPOSITORY" source/dist/*.zip --clobber
+          gh release view "$draft" -R "$GITHUB_REPOSITORY" --json isDraft,databaseId,assets > "$RUNNER_TEMP/draft.json"
+          python3 - "$RUNNER_TEMP/draft.json" <<'PY'
+          import hashlib,json,sys
           from pathlib import Path
-          stable = re.compile(r"v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)")
-          tags = (stable.fullmatch(t) for t in Path("tags").read_text().splitlines())
-          parts = list(max((tuple(map(int, tag.groups())) for tag in tags if tag), default=(0, 0, 0)))
-          index = ["major", "minor", "patch"].index(os.environ["BUMP"])
-          parts[index] += 1
-          parts[index + 1:] = [0] * (2 - index)
-          print("v" + ".".join(map(str, parts)))
+          info=json.loads(Path(sys.argv[1]).read_text())
+          assert info["isDraft"]
+          actual={a["name"]:a["digest"] for a in info["assets"] if a["state"]=="uploaded"}
+          expected={p.name:"sha256:"+hashlib.sha256(p.read_bytes()).hexdigest() for p in Path("source/dist").iterdir()}
+          assert actual==expected and len(info["assets"])==len(expected)
           PY
-          )
-          jq --arg tag "$version" --arg sha "$GITHUB_SHA" '{
-            tag_name: $tag, target_commitish: $sha, name: ("TubeHero " + $tag),
-            body: ((.body // "") + "\n\n### SHA-256\n\n" +
-              ([.assets[] | "- `" + .name + "` — `" + (.digest | sub("^sha256:"; "")) + "`"] | join("\n"))),
-            draft: false, prerelease: false, make_latest: "true"
-          }' candidate.json > publish.json
-          gh api --method PATCH "$api/releases/$id" --input publish.json --jq '.html_url'
+          id=$(jq -r .databaseId "$RUNNER_TEMP/draft.json")
+          jq -n --arg tag "v$VERSION" --arg sha "$GITHUB_SHA" --rawfile body "$notes" '{tag_name:$tag, target_commitish:$sha, name:("TubeHero "+$tag),body:$body,draft:false,prerelease:false,make_latest:"true"}' > "$RUNNER_TEMP/release.json"
+          gh api --method PATCH "$api/releases/$id" --input "$RUNNER_TEMP/release.json" --jq .html_url
