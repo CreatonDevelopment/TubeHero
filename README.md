@@ -1,13 +1,23 @@
 # TubeHero
 
-TubeHero is a controller-first YouTube client for retro handhelds. Download the installable ZIP from [Releases](https://github.com/CreatonDevelopment/TubeHero/releases/latest).
+Watch YouTube videos and livestreams on a retro handheld using its D-pad and buttons.
 
-## Install on a TrimUI Brick Hammer
+## Device downloads
 
-1. Check that the release lists your model and firmware. The current build targets stock Hammer firmware 1.1.1.
-2. Extract the device ZIP at the root of the SD card. The app should be at `Apps/UTubeHero`.
-3. Insert the card, open **Apps → TubeHero**, and connect to Wi-Fi.
+Choose your TrimUI model. Each link downloads the latest TubeHero ZIP for that device.
 
-## Publishing a release
+| Device | Model | Stock firmware checked | Download |
+| --- | --- | --- | --- |
+| TrimUI Brick / Brick Hammer | TG3040 | 1.1.1 | [Brick ZIP](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-TrimUI-Brick.zip) |
+| TrimUI Brick Pro | TG4040 | 1.1.1 | [Brick Pro ZIP](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-TrimUI-Brick-Pro.zip) |
+| TrimUI Smart Pro | TG5040 | 1.1.1 | [Smart Pro ZIP](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-TrimUI-Smart-Pro.zip) |
+| TrimUI Smart Pro S | TG5050 | 1.0.1 | [Smart Pro S ZIP](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-TrimUI-Smart-Pro-S.zip) |
 
-After the tested device ZIP has been staged in the **candidate** draft, open **Actions → Publish release → Run workflow** on `main`. Choose **patch**, **minor**, or **major**. The workflow calculates the next stable version and publishes the staged build with its SHA-256 checksum.
+The app and player were checked with the listed firmware libraries under ARM emulation. Earlier builds also played video on a physical Brick Hammer. Screen, sound, and controls on physical devices still need verification for this release.
+
+## Install
+
+1. Extract the ZIP at the root of your SD card. You should see the folder `Apps/UTubeHero`.
+2. Insert the card, open **TubeHero** from the **Apps** menu, and connect to Wi-Fi.
+
+[Release notes and checksums](https://github.com/CreatonDevelopment/TubeHero/releases/latest)

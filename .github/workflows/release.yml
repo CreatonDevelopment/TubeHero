@@ -29,12 +29,11 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       BUMP: ${{ inputs.bump }}
     steps:
-      - name: Publish the staged device build
+      - name: Publish the staged device packages
         shell: bash
         run: |
           set -euo pipefail
           api="repos/$GITHUB_REPOSITORY"
-          asset="TubeHero-Brick-Hammer-Stock-1.1.1.zip"
           gh api --paginate "$api/releases?per_page=100" --jq '.[] | select(.draft and .tag_name == "candidate") | .id' > drafts
           if [[ $(wc -l < drafts) -ne 1 ]]; then
             echo "::error::Stage the tested device ZIP in the candidate draft first."
@@ -42,10 +41,14 @@ jobs:
           fi
           id=$(cat drafts)
           gh api "$api/releases/$id" > candidate.json
-          jq -e --arg asset "$asset" '.draft and .tag_name == "candidate" and
-            (.assets | length == 1) and .assets[0].name == $asset and
-            .assets[0].state == "uploaded" and .assets[0].size > 0 and
-            (.assets[0].digest | test("^sha256:[a-f0-9]{64}$"))' candidate.json > /dev/null
+          gh api "$api/contents/README.md?ref=$GITHUB_SHA" --jq .content | base64 -d > README.md
+          grep -oE 'releases/latest/download/[A-Za-z0-9._-]+\.zip' README.md | cut -d/ -f4 | sort -u > listed
+          test -s listed
+          jq -r '.assets[].name' candidate.json | sort > staged
+          diff -u listed staged
+          jq -e '.draft and .tag_name == "candidate" and all(.assets[];
+            .state == "uploaded" and .size > 0 and
+            (.digest | test("^sha256:[a-f0-9]{64}$")))' candidate.json > /dev/null
 
           gh api --paginate "$api/tags?per_page=100" --jq '.[].name' > tags
           version=$(python3 - <<'PY'
@@ -62,7 +65,8 @@ jobs:
           )
           jq --arg tag "$version" --arg sha "$GITHUB_SHA" '{
             tag_name: $tag, target_commitish: $sha, name: ("TubeHero " + $tag),
-            body: ((.body // "") + "\n\nPackage SHA-256\n\n`" + (.assets[0].digest | sub("^sha256:"; "")) + "`"),
+            body: ((.body // "") + "\n\n### SHA-256\n\n" +
+              ([.assets[] | "- `" + .name + "` — `" + (.digest | sub("^sha256:"; "")) + "`"] | join("\n"))),
             draft: false, prerelease: false, make_latest: "true"
           }' candidate.json > publish.json
           gh api --method PATCH "$api/releases/$id" --input publish.json --jq '.html_url'
