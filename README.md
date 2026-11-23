@@ -20,4 +20,10 @@ The app and player were checked with the listed firmware libraries under ARM emu
 1. Extract the ZIP at the root of your SD card. You should see the folder `Apps/UTubeHero`.
 2. Insert the card, open **TubeHero** from the **Apps** menu, and connect to Wi-Fi.
 
+## Updates
+
+If you have v0.1.0, install the latest ZIP for your model once to get the updater. Starting with v0.2.0, TubeHero checks for stable releases whenever you open it. You can also select **Settings → Check for updates** to check again or see the result.
+
+When an update is ready, close and reopen TubeHero to apply it. Your library and playback preferences carry over. If the update cannot open its first screen, TubeHero returns to the previous working version.
+
 [Release notes and checksums](https://github.com/CreatonDevelopment/TubeHero/releases/latest)
