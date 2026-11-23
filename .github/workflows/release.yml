@@ -71,7 +71,8 @@ jobs:
         run: |
           set -euo pipefail
           sudo apt-get update -qq
-          sudo apt-get install -y -qq --no-install-recommends ffmpeg xvfb xauth libsdl2-2.0-0 libgl1-mesa-dri libegl1
+          sudo apt-get install -y -qq --no-install-recommends ffmpeg xvfb xauth libsdl2-2.0-0 libgl1-mesa-dri libegl1 libegl-mesa0 libgles2 libglx-mesa0
+          export SDL_VIDEO_EGL_DRIVER=libEGL.so.1 SDL_VIDEO_GL_DRIVER=libGLESv2.so.2
           if ! xvfb-run -a python3 source/tests/update_install.py source/dist >"$RUNNER_TEMP/device-test.log" 2>&1; then
             grep -E 'passed|rolled back|RuntimeError:|AssertionError:' "$RUNNER_TEMP/device-test.log" | cut -c1-250 | tail -8 || true
             exit 1
