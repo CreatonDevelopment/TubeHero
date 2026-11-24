@@ -6,14 +6,14 @@ Watch YouTube videos and livestreams on a retro handheld using its D-pad and but
 
 Find your device's row and your firmware's column, then select ⬇️ to download that ZIP.
 
-| Device | Stock | NextUI | NX Redux | spruceOS | muOS | Knulli |
-| --- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **TrimUI** Brick / Brick Hammer | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-TrimUI-Brick.zip "Download TubeHero-TrimUI-Brick.zip") | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-NextUI-TG5040.zip "Download TubeHero-NextUI-TG5040.zip") | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-NXRedux-Brick.zip "Download TubeHero-NXRedux-Brick.zip") | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-spruceOS.zip "Download TubeHero-spruceOS.zip") | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-muOS.zip "Download TubeHero-muOS.zip") | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-Knulli.zip "Download TubeHero-Knulli.zip") |
-| **TrimUI** Brick Pro | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-TrimUI-Brick-Pro.zip "Download TubeHero-TrimUI-Brick-Pro.zip") | — | — | — | — | — |
-| **TrimUI** Smart Pro | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-TrimUI-Smart-Pro.zip "Download TubeHero-TrimUI-Smart-Pro.zip") | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-NextUI-TG5040.zip "Download TubeHero-NextUI-TG5040.zip") | — | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-spruceOS.zip "Download TubeHero-spruceOS.zip") | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-muOS.zip "Download TubeHero-muOS.zip") | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-Knulli.zip "Download TubeHero-Knulli.zip") |
-| **TrimUI** Smart Pro S | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-TrimUI-Smart-Pro-S.zip "Download TubeHero-TrimUI-Smart-Pro-S.zip") | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-NextUI-TG5050.zip "Download TubeHero-NextUI-TG5050.zip") | — | — | — | — |
-| **Anbernic** RG35XX / RG40XX / RG34XX / CubeXX (H700) | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-Anbernic-H700.zip "Download TubeHero-Anbernic-H700.zip") | — | — | — | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-muOS.zip "Download TubeHero-muOS.zip") | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-Knulli.zip "Download TubeHero-Knulli.zip") |
-| **Miyoo** Flip | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-Miyoo-Flip.zip "Download TubeHero-Miyoo-Flip.zip") | — | — | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-spruceOS.zip "Download TubeHero-spruceOS.zip") | — | — |
+| Device | Stock | NextUI | NX Redux | Mosaik | spruceOS | muOS | Knulli |
+| --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **TrimUI** Brick / Brick Hammer | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-TrimUI-Brick.zip "Download TubeHero-TrimUI-Brick.zip") | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-NextUI-TG5040.zip "Download TubeHero-NextUI-TG5040.zip") | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-NXRedux-Brick.zip "Download TubeHero-NXRedux-Brick.zip") | — | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-spruceOS.zip "Download TubeHero-spruceOS.zip") | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-muOS.zip "Download TubeHero-muOS.zip") | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-Knulli.zip "Download TubeHero-Knulli.zip") |
+| **TrimUI** Brick Pro | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-TrimUI-Brick-Pro.zip "Download TubeHero-TrimUI-Brick-Pro.zip") | — | — | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-Mosaik.zip "Download TubeHero-Mosaik.zip") | — | — | — |
+| **TrimUI** Smart Pro | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-TrimUI-Smart-Pro.zip "Download TubeHero-TrimUI-Smart-Pro.zip") | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-NextUI-TG5040.zip "Download TubeHero-NextUI-TG5040.zip") | — | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-Mosaik.zip "Download TubeHero-Mosaik.zip") | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-spruceOS.zip "Download TubeHero-spruceOS.zip") | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-muOS.zip "Download TubeHero-muOS.zip") | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-Knulli.zip "Download TubeHero-Knulli.zip") |
+| **TrimUI** Smart Pro S | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-TrimUI-Smart-Pro-S.zip "Download TubeHero-TrimUI-Smart-Pro-S.zip") | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-NextUI-TG5050.zip "Download TubeHero-NextUI-TG5050.zip") | — | — | — | — | — |
+| **Anbernic** RG35XX / RG40XX / RG34XX / CubeXX (H700) | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-Anbernic-H700.zip "Download TubeHero-Anbernic-H700.zip") | — | — | — | — | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-muOS.zip "Download TubeHero-muOS.zip") | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-Knulli.zip "Download TubeHero-Knulli.zip") |
+| **Miyoo** Flip | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-Miyoo-Flip.zip "Download TubeHero-Miyoo-Flip.zip") | — | — | — | [⬇️](https://github.com/CreatonDevelopment/TubeHero/releases/latest/download/TubeHero-spruceOS.zip "Download TubeHero-spruceOS.zip") | — | — |
 
 The Anbernic H700 row covers the RG35XX Plus, H, SP, Pro and 2024, RG40XX H and V, RG CubeXX, RG34XX and RG34XX SP.
 
@@ -23,10 +23,13 @@ The Anbernic H700 row covers the RG35XX Plus, H, SP, Pro and 2024, RG40XX H and 
 
 Extract the ZIP at the root of your SD card, insert the card, open **TubeHero** from your firmware's menu, and connect to Wi-Fi.
 
+For Mosaik, use the root of the **MOSAIK** partition.
+
 | Firmware | Folder on the SD card | Open from |
 | --- | --- | --- |
 | TrimUI stock | `Apps/UTubeHero` | Apps |
 | NextUI, NX Redux | `Tools/tg5040/TubeHero.pak` (Smart Pro S: `tg5050`) | Tools |
+| Mosaik | `Arcade/Apps/TubeHero` | Apps |
 | spruceOS, Miyoo stock | `App/TubeHero` | Apps |
 | muOS | `MUOS/application/TubeHero` | Applications |
 | Knulli | `roms/ports/tubehero` | Ports |
