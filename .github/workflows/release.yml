@@ -85,10 +85,11 @@ jobs:
           set -euo pipefail
           api="repos/$GITHUB_REPOSITORY"
           gh api "$api/contents/README.md?ref=$GITHUB_SHA" --jq .content | base64 -d > "$RUNNER_TEMP/README"
-          grep -oE 'releases/latest/download/[A-Za-z0-9._-]+\.zip' "$RUNNER_TEMP/README" | cut -d/ -f4 | sort -u > "$RUNNER_TEMP/listed"
+          grep -oE 'releases/latest/download/[A-Za-z0-9._-]+\.(zip|muxzip)' "$RUNNER_TEMP/README" | cut -d/ -f4 | sort -u > "$RUNNER_TEMP/listed"
           find source/dist -maxdepth 1 -type f -printf '%f\n' | sort > "$RUNNER_TEMP/built"
           test -s "$RUNNER_TEMP/listed"
           diff -u "$RUNNER_TEMP/listed" "$RUNNER_TEMP/built"
+          mapfile -t assets < "$RUNNER_TEMP/built"
           notes="$RUNNER_TEMP/notes.md"
           if [[ -f "source/docs/releases/v$VERSION.md" ]]; then
             cp "source/docs/releases/v$VERSION.md" "$notes"
@@ -96,7 +97,7 @@ jobs:
             printf 'Choose your model from the [device download guide](https://github.com/%s#device-downloads).\n' "$GITHUB_REPOSITORY" > "$notes"
           fi
           printf '\n### SHA-256\n\n' >> "$notes"
-          (cd source/dist && sha256sum *.zip) | awk '{printf "- `%s` - `%s`\n",$2,$1}' >> "$notes"
+          (cd source/dist && sha256sum "${assets[@]}") | awk '{printf "- `%s` - `%s`\n",$2,$1}' >> "$notes"
           marker="<!-- release-run:$GITHUB_RUN_ID -->"
           printf '\n%s\n' "$marker" >> "$notes"
           gh api --paginate "$api/releases?per_page=100" --jq '.[] | select(.draft == false) | .body' > "$RUNNER_TEMP/published"
@@ -105,7 +106,7 @@ jobs:
           if ! gh release view "$draft" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release create "$draft" -R "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --draft --title "TubeHero v$VERSION" --notes-file "$notes"
           fi
-          gh release upload "$draft" -R "$GITHUB_REPOSITORY" source/dist/*.zip --clobber
+          (cd source/dist && gh release upload "$draft" -R "$GITHUB_REPOSITORY" "${assets[@]}" --clobber)
           gh release view "$draft" -R "$GITHUB_REPOSITORY" --json isDraft,databaseId,assets > "$RUNNER_TEMP/draft.json"
           python3 - "$RUNNER_TEMP/draft.json" <<'PY'
           import hashlib,json,sys
